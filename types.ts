@@ -19,6 +19,7 @@ export interface OPRData {
   images: ActivityImage[];
   category: 'Pentadbiran' | 'Kurikulum' | 'Hal Ehwal Murid' | 'Kokurikulum' | 'Lain-lain';
   createdAt: number;
+  synced?: boolean; // Status sinkronisasi ke Google Sheets
 }
 
-export type AppTab = 'dashboard' | 'list' | 'new' | 'view';
+export type AppTab = 'dashboard' | 'list' | 'new' | 'view' | 'settings';
