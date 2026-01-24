@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem OPR Digital | SK Laksian Banggi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e40af;
+      --secondary: #64748b;
+    }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      scroll-behavior: smooth;
+    }
+    .font-serif-official { 
+      font-family: 'Playfair Display', serif; 
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    /* Strict A4 Print Layout */
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      html, body {
+        height: 297mm;
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #root {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+      main {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+        display: block !important;
+      }
+      .opr-page {
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-after: always;
+        overflow: hidden !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      /* Ensure images and colors print clearly */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
+    "jspdf": "https://esm.sh/jspdf@^2.5.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+  <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

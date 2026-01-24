@@ -1,0 +1,7 @@
+{
+  "name": "Sistem OPR SK Laksian Banggi",
+  "description": "Sistem pelaporan One Page Report (OPR) untuk Sekolah Kebangsaan Laksian Banggi dengan dashboard, pengurusan laporan, dan penjanaan dokumen OPR 6-gambar.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
