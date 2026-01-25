@@ -10,6 +10,7 @@ export interface OPRData {
   id: string;
   programName: string;
   date: string;
+  time: string;
   venue: string;
   targetGroup: string;
   objectives: string[];
@@ -19,7 +20,6 @@ export interface OPRData {
   images: ActivityImage[];
   category: 'Pentadbiran' | 'Kurikulum' | 'Hal Ehwal Murid' | 'Kokurikulum' | 'Lain-lain';
   createdAt: number;
-  synced?: boolean; // Status sinkronisasi ke Google Sheets
 }
 
-export type AppTab = 'dashboard' | 'list' | 'new' | 'view' | 'settings';
+export type AppTab = 'dashboard' | 'list' | 'new' | 'view';
