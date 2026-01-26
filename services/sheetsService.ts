@@ -4,39 +4,42 @@ import { SHEETS_API_URL } from '../constants';
 
 export const sheetsService = {
   async fetchReports(): Promise<OPRData[]> {
-    if (!SHEETS_API_URL) {
-      const localData = localStorage.getItem('opr_reports');
-      return localData ? JSON.parse(localData) : [];
-    }
+    // Ambil data tempatan dahulu sebagai sandaran pantas
+    const localData = localStorage.getItem('opr_reports');
+    const fallback = localData ? JSON.parse(localData) : [];
+
+    if (!SHEETS_API_URL) return fallback;
 
     try {
-      const response = await fetch(`${SHEETS_API_URL}?action=read`, {
+      // Tambah timestamp untuk mengelakkan cache Safari yang agresif
+      const url = `${SHEETS_API_URL}?action=read&_t=${Date.now()}`;
+      const response = await fetch(url, {
         method: 'GET',
         mode: 'cors',
         credentials: 'omit',
-        redirect: 'follow'
+        redirect: 'follow',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`Ralat Pelayan: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
       const data = await response.json();
       
       if (Array.isArray(data)) {
+        // Simpan versi terbaru ke cache tempatan
         localStorage.setItem('opr_reports', JSON.stringify(data));
         return data;
       }
-      return [];
+      return fallback;
     } catch (error) {
-      console.warn("Cloud Sync gagal. Menggunakan data tempatan:", error);
-      const localData = localStorage.getItem('opr_reports');
-      return localData ? JSON.parse(localData) : [];
+      console.warn("Cloud Sync gagal atau disekat oleh Safari. Menggunakan data tempatan:", error);
+      return fallback;
     }
   },
 
   async saveReport(report: OPRData): Promise<boolean> {
-    // Simpan ke localStorage dahulu (Offline First)
     const local = JSON.parse(localStorage.getItem('opr_reports') || '[]');
     const existsIndex = local.findIndex((r: any) => r.id === report.id);
     
@@ -50,8 +53,6 @@ export const sheetsService = {
     if (!SHEETS_API_URL) return true;
 
     try {
-      // Kita gunakan mode 'no-cors' untuk POST ke Google Apps Script
-      // Ini mengelakkan masalah Pre-flight OPTIONS request yang selalu gagal di GAS
       await fetch(SHEETS_API_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -61,7 +62,7 @@ export const sheetsService = {
       return true;
     } catch (error) {
       console.error("Gagal menyimpan ke Cloud:", error);
-      return true; // Return true kerana data sudah selamat di localStorage
+      return true; 
     }
   },
 

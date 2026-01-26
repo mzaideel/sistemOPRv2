@@ -9,18 +9,18 @@ interface DashboardProps {
   onViewReport: (id: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ reports, onViewReport }) => {
+const Dashboard: React.FC<DashboardProps> = ({ reports = [], onViewReport }) => {
   const stats = useMemo(() => {
     return CATEGORIES.map(cat => ({
       name: cat,
-      count: reports.filter(r => r.category === cat).length
+      count: (reports || []).filter(r => r.category === cat).length
     }));
   }, [reports]);
 
   const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#6366f1', '#94a3b8'];
 
   const recentReports = useMemo(() => {
-    return [...reports].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+    return [...(reports || [])].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
   }, [reports]);
 
   return (
@@ -35,10 +35,10 @@ const Dashboard: React.FC<DashboardProps> = ({ reports, onViewReport }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
-          { label: 'Jumlah Laporan', value: reports.length, color: 'text-blue-600', bg: 'bg-blue-50', icon: '📊' },
-          { label: 'Laporan Bulan Ini', value: reports.filter(r => new Date(r.createdAt).getMonth() === new Date().getMonth()).length, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '📅' },
+          { label: 'Jumlah Laporan', value: (reports || []).length, color: 'text-blue-600', bg: 'bg-blue-50', icon: '📊' },
+          { label: 'Laporan Bulan Ini', value: (reports || []).filter(r => new Date(r.createdAt).getMonth() === new Date().getMonth()).length, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '📅' },
         ].map((item, i) => (
-          <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 flex items-center gap-6">
+          <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-6">
             <div className={`w-16 h-16 ${item.bg} rounded-2xl flex items-center justify-center text-2xl`}>
               {item.icon}
             </div>
@@ -52,15 +52,8 @@ const Dashboard: React.FC<DashboardProps> = ({ reports, onViewReport }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-lg font-bold text-slate-900">Analisis Mengikut Kategori</h3>
-            <div className="flex gap-2">
-              {COLORS.slice(0, 4).map((color, i) => (
-                <div key={i} className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-              ))}
-            </div>
-          </div>
-          <div className="h-[300px]">
+          <h3 className="text-lg font-bold text-slate-900 mb-8">Analisis Mengikut Kategori</h3>
+          <div className="h-[300px] w-full" style={{ minHeight: '300px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -99,9 +92,9 @@ const Dashboard: React.FC<DashboardProps> = ({ reports, onViewReport }) => {
                   onClick={() => onViewReport(report.id)}
                   className="group cursor-pointer flex gap-4 items-start p-2 rounded-xl hover:bg-slate-50 transition-all"
                 >
-                  <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform" />
+                  <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                   <div className="flex-grow">
-                    <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 text-sm uppercase">{report.programName}</h4>
+                    <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 text-sm uppercase">{report.programName || 'TIADA NAMA'}</h4>
                     <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider">{report.date} • {report.category}</p>
                   </div>
                 </div>

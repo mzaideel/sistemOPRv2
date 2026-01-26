@@ -10,14 +10,17 @@ interface ReportListProps {
   onEdit: (id: string) => void;
 }
 
-const ReportList: React.FC<ReportListProps> = ({ reports, onView, onDelete, onEdit }) => {
+const ReportList: React.FC<ReportListProps> = ({ reports = [], onView, onDelete, onEdit }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredReports = reports.filter(r => 
-    r.programName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.reporterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Menambah semakan keselamatan untuk mengelakkan ralat pada nilai null/undefined di Safari
+  const filteredReports = reports.filter(r => {
+    const term = searchTerm.toLowerCase();
+    const name = (r.programName || '').toLowerCase();
+    const reporter = (r.reporterName || '').toLowerCase();
+    const category = (r.category || '').toLowerCase();
+    return name.includes(term) || reporter.includes(term) || category.includes(term);
+  });
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
@@ -32,7 +35,12 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onView, onDelete, onEd
   const formatDateWithDayAndTime = (dateStr: string, timeStr: string) => {
     if (!dateStr) return '-';
     try {
-      const date = new Date(dateStr);
+      // Penyelaras tarikh untuk Safari (YYYY-MM-DD format)
+      const parts = dateStr.split('-');
+      const date = parts.length === 3 
+        ? new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))
+        : new Date(dateStr);
+        
       if (isNaN(date.getTime())) return dateStr;
       
       const day = String(date.getDate()).padStart(2, '0');
@@ -85,7 +93,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onView, onDelete, onEd
                 
                 <div className="col-span-1 lg:col-span-5">
                   <h3 className="text-[13px] font-bold text-slate-800 group-hover:text-blue-700 transition-colors leading-tight line-clamp-1 uppercase">
-                    {report.programName}
+                    {report.programName || 'TIADA NAMA PROGRAM'}
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] text-slate-400 font-semibold truncate max-w-[200px]">
@@ -93,7 +101,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onView, onDelete, onEd
                     </span>
                     <span className="text-[10px] text-slate-300">•</span>
                     <span className="text-[10px] text-slate-400 font-medium truncate">
-                      {report.reporterName}
+                      {report.reporterName || 'Nama Pelapor'}
                     </span>
                   </div>
                 </div>
@@ -141,14 +149,6 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onView, onDelete, onEd
             </div>
           )}
         </div>
-      </div>
-
-      <div className="flex justify-between items-center no-print px-2">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          {filteredReports.length} Entri Dijumpai
-        </p>
-        <div className="h-px bg-slate-100 flex-grow mx-4 hidden sm:block" />
-        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OPR Digital SKLB</p>
       </div>
     </div>
   );

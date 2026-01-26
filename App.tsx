@@ -10,7 +10,13 @@ import { sheetsService } from './services/sheetsService';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
-  const [reports, setReports] = useState<OPRData[]>([]);
+  
+  // Inisialisasi state dengan data tempatan terus untuk kepantasan (Safari optimization)
+  const [reports, setReports] = useState<OPRData[]>(() => {
+    const local = localStorage.getItem('opr_reports');
+    return local ? JSON.parse(local) : [];
+  });
+  
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCloudActive, setIsCloudActive] = useState(!!SHEETS_API_URL);
@@ -19,7 +25,9 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       const data = await sheetsService.fetchReports();
-      setReports(data);
+      if (data && data.length >= 0) {
+        setReports(data);
+      }
     } catch (e) {
       console.error("Gagal memuatkan data:", e);
     } finally {
@@ -35,7 +43,6 @@ const App: React.FC = () => {
     setIsLoading(true);
     const success = await sheetsService.saveReport(data);
     if (success) {
-      // Refresh data dari server untuk kepastian
       await loadData();
       setActiveTab('list');
     } else {
@@ -50,7 +57,6 @@ const App: React.FC = () => {
     const success = await sheetsService.deleteReport(id);
     if (success) {
       setReports(prev => prev.filter(r => r.id !== id));
-      // Jika kita guna no-cors, kita kena filter manual atau re-fetch selepas delay
       setTimeout(loadData, 1000); 
     }
     setIsLoading(false);
@@ -154,11 +160,6 @@ const App: React.FC = () => {
       <footer className="py-10 text-center border-t border-slate-100 no-print">
          <div className="flex flex-col items-center gap-2">
             <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.3em]">Hak Cipta Terpelihara © {new Date().getFullYear()} SK Laksian Banggi</p>
-            {!SHEETS_API_URL && (
-              <p className="text-[10px] text-amber-500 font-bold bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-                Peringatan: Cloud Sync belum diaktifkan. Data disimpan dalam pelayar ini sahaja.
-              </p>
-            )}
          </div>
       </footer>
     </div>
