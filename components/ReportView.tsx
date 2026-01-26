@@ -33,16 +33,28 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
     
     try {
       setIsGenerating(true);
+      await document.fonts.ready;
+
       const canvas = await html2canvas(oprRef.current, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: 1200 // Membantu Safari menentukan saiz viewport yang betul
+        onclone: (clonedDoc) => {
+          const element = clonedDoc.querySelector('.opr-page') as HTMLElement;
+          if (element) {
+            element.style.boxShadow = 'none';
+            element.style.border = 'none';
+            const textElements = element.querySelectorAll('p, h1, h2, h3, label');
+            textElements.forEach((el: any) => {
+              el.style.lineHeight = '1.3';
+            });
+          }
+        }
       });
       
-      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -52,12 +64,12 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       pdf.save(`OPR_${data.programName.replace(/\s+/g, '_')}_SKLB.pdf`);
       
     } catch (error) {
       console.error('Gagal menjana PDF:', error);
-      alert('Maaf, ralat berlaku semasa menjana PDF. Sila pastikan sambungan internet stabil.');
+      alert('Maaf, ralat berlaku semasa menjana PDF. Sila cuba lagi.');
     } finally {
       setIsGenerating(false);
     }
@@ -91,7 +103,6 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
 
   return (
     <div className="max-w-6xl mx-auto animate-fadeIn mb-20 px-4">
-      {/* Kontrol Atas */}
       <div className="no-print flex items-center justify-between mb-8 bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-sm border border-slate-200">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-500 font-bold hover:text-slate-900 transition-all group px-4 py-2 rounded-xl hover:bg-slate-100">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -102,7 +113,7 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
           {isGenerating && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl animate-pulse">
               <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-[9px] font-black uppercase tracking-wider">Menjana...</span>
+              <span className="text-[9px] font-black uppercase tracking-wider">Menjana PDF...</span>
             </div>
           )}
           
@@ -120,63 +131,61 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
         </div>
       </div>
 
-      {/* Wrapper Skrol Mendatar - KRITIKAL untuk SAFARI/MOBILE */}
       <div className="w-full overflow-x-auto pb-10 flex justify-start lg:justify-center">
         <div 
           ref={oprRef} 
           className="opr-page bg-white shadow-2xl border border-slate-100 font-sans relative flex-shrink-0" 
           style={{ width: '210mm', height: '297mm', minWidth: '210mm', minHeight: '297mm', overflow: 'hidden' }}
         >
-          <header className="relative flex items-center justify-between px-10 pt-10 pb-6 border-b-4 border-slate-900 bg-slate-50/30">
+          <header className="relative flex items-center justify-between px-10 pt-8 pb-5 border-b-4 border-slate-900 bg-slate-50/30">
             <div className="flex items-center gap-6">
-              <img src={MAIN_LOGO_URL} className="h-20 w-auto object-contain" alt="Logo" />
-              <div className="h-16 w-px bg-slate-300" />
+              <img src={MAIN_LOGO_URL} className="h-14 w-auto object-contain" alt="Logo" />
+              <div className="h-12 w-px bg-slate-300" />
             </div>
             <div className="flex-grow text-right">
-              <h1 className="text-[20px] font-serif-official font-bold uppercase text-slate-900 tracking-tight leading-none mb-1">{SCHOOL_NAME}</h1>
-              <p className="text-[9px] font-black tracking-[0.4em] text-blue-600 uppercase mb-2">Kementerian Pendidikan Malaysia</p>
+              <h1 className="text-[18px] font-serif-official font-bold uppercase text-slate-900 tracking-tight leading-tight mb-0.5">{SCHOOL_NAME}</h1>
+              <p className="text-[8px] font-black tracking-[0.4em] text-blue-600 uppercase mb-2 leading-tight">Kementerian Pendidikan Malaysia</p>
               <div className="inline-block px-3 py-1 bg-slate-900 text-white rounded-md">
-                <p className="text-[10px] font-black tracking-[0.2em] uppercase">One Page Report (OPR)</p>
+                <p className="text-[9px] font-black tracking-[0.2em] uppercase leading-tight">One Page Report (OPR)</p>
               </div>
             </div>
           </header>
 
-          <div className="grid grid-cols-12 h-[calc(100%-140px)]">
-            {/* Lajur Kiri: Maklumat & Objektif */}
+          <div className="grid grid-cols-12 h-[calc(100%-130px)]">
             <div className="col-span-6 border-r-2 border-slate-100 p-8 flex flex-col justify-between">
               <div className="space-y-5">
                 <div>
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-1.5">Laporan Program / Aktiviti</label>
+                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-1.5 leading-tight">Laporan Program / Aktiviti</label>
                   <h2 className="text-base font-black text-white leading-tight uppercase bg-slate-900 p-3 rounded-xl shadow-md">{data.programName}</h2>
                 </div>
                 
                 <div className="space-y-1.5">
                   <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">Tarikh</label></div>
-                    <p className="text-[10px] font-bold text-slate-800">{formatDate(data.date)}</p>
+                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block leading-tight">Tarikh</label></div>
+                    <p className="text-[10px] font-bold text-slate-800 leading-tight">{formatDate(data.date)}</p>
                   </div>
                   <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">Masa</label></div>
-                    <p className="text-[10px] font-bold text-slate-800">{data.time || '-'}</p>
+                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block leading-tight">Masa</label></div>
+                    <p className="text-[10px] font-bold text-slate-800 leading-tight">{data.time || '-'}</p>
                   </div>
                   <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">Bidang</label></div>
-                    <p className="text-[10px] font-bold text-slate-800">{data.category}</p>
+                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block leading-tight">Bidang</label></div>
+                    <p className="text-[10px] font-bold text-slate-800 leading-tight">{data.category}</p>
                   </div>
                   <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">Lokasi</label></div>
-                    <p className="text-[10px] font-bold text-slate-800 truncate">{data.venue || '-'}</p>
+                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block leading-tight">Lokasi</label></div>
+                    <p className="text-[10px] font-bold text-slate-800 truncate leading-tight">{data.venue || '-'}</p>
                   </div>
                   <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">Sasaran</label></div>
-                    <p className="text-[10px] font-bold text-slate-800 truncate">{data.targetGroup || '-'}</p>
+                    <div className="w-20 flex-shrink-0"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest block leading-tight">Sasaran</label></div>
+                    <p className="text-[10px] font-bold text-slate-800 truncate leading-tight">{data.targetGroup || '-'}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8px] font-black">A</div>
-                    <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Objektif</h3>
+                    <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-widest leading-tight">Objektif</h3>
                   </div>
                   <div className="pl-7 space-y-1">
                     {data.objectives.filter(o => o.trim()).map((obj, i) => (
@@ -191,7 +200,7 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-black">B</div>
-                    <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Impak & Refleksi</h3>
+                    <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-widest leading-tight">Impak & Refleksi</h3>
                   </div>
                   <div className="pl-7">
                     <p className="text-[9px] font-bold text-slate-600 leading-relaxed italic border-l-2 border-emerald-100 pl-3 py-1">
@@ -202,19 +211,18 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
               </div>
 
               <div className="pt-6 mt-6 border-t border-slate-100">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Disediakan Oleh:</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8 leading-tight">Disediakan Oleh:</p>
                 <div className="h-0.5 w-48 bg-slate-900 mb-2" />
-                <p className="text-[12px] font-black text-slate-900 uppercase leading-none">{data.reporterName || 'NAMA PELAPOR'}</p>
-                <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1.5">{data.reporterPosition || 'JAWATAN'}</p>
-                <p className="text-[7px] font-bold text-slate-400 mt-1 uppercase tracking-widest">SK LAKSIAN BANGGI</p>
+                <p className="text-[12px] font-black text-slate-900 uppercase leading-tight">{data.reporterName || 'NAMA PELAPOR'}</p>
+                <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1.5 leading-tight">{data.reporterPosition || 'JAWATAN'}</p>
+                <p className="text-[7px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-tight">SK LAKSIAN BANGGI</p>
               </div>
             </div>
 
-            {/* Lajur Kanan: Gambar */}
             <div className="col-span-6 bg-slate-50/20 p-6 flex flex-col items-center border-l-2 border-slate-100">
               <div className="w-full flex items-center gap-3 mb-4">
                 <div className="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-black">C</div>
-                <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-[0.2em]">Lensa Aktiviti (4 Gambar)</h3>
+                <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-[0.2em] leading-tight">Lensa Aktiviti (4 Gambar)</h3>
               </div>
               
               <div className="flex flex-col gap-2 w-full items-center justify-center">
@@ -232,7 +240,7 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
                         )}
                         {img?.caption && (
                           <div className="absolute bottom-1 left-1 right-1 bg-white/80 backdrop-blur-sm px-1.5 py-1 rounded border border-white/40">
-                            <p className="text-[6.5px] font-black text-slate-800 uppercase tracking-tight text-center leading-none line-clamp-1">{img.caption}</p>
+                            <p className="text-[6.5px] font-black text-slate-800 uppercase tracking-tight text-center leading-tight line-clamp-1">{img.caption}</p>
                           </div>
                         )}
                       </div>
@@ -243,10 +251,10 @@ const ReportView: React.FC<ReportViewProps> = ({ data, reportNumber = 1, onBack,
 
               <div className="mt-auto w-full pt-4 flex justify-between items-end opacity-40">
                  <div>
-                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Bil. Laporan:</p>
-                    <p className="text-[7px] font-mono font-bold text-slate-500">{getFileCode()}</p>
+                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-tight">Bil. Laporan:</p>
+                    <p className="text-[7px] font-mono font-bold text-slate-500 leading-tight">{getFileCode()}</p>
                  </div>
-                 <div className="text-[10px] font-black text-slate-200 border-2 border-slate-100 px-2 py-0.5 rounded rotate-[-15deg]">SKLB</div>
+                 <div className="text-[10px] font-black text-slate-200 border-2 border-slate-100 px-2 py-0.5 rounded rotate-[-15deg] leading-tight">SKLB</div>
               </div>
             </div>
           </div>
