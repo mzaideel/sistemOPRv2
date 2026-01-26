@@ -100,7 +100,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSave, onCancel, initialData }
     setIsProcessing(true);
     const currentImages = formData.images || [];
     const remainingSlots = 4 - currentImages.length;
-    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    // Fix: Explicitly cast Array.from result to File[] to prevent 'unknown' type inference
+    const filesToProcess = (Array.from(files) as File[]).slice(0, remainingSlots);
 
     try {
       for (const file of filesToProcess) {
