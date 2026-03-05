@@ -4,8 +4,8 @@ import React from 'react';
 // URL Google Apps Script Web App anda yang baru
 export const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzS2Bq5UHCO3apHNHX9BaoL-59ZgARrklgoscqfd7laLpfx5pxJ9tuAxlLXri1QM3WAhg/exec'; 
 
-export const MAIN_LOGO_URL = 'https://i.postimg.cc/Gm3TwhZZ/KPM-SKLB.png';
-export const KPM_LOGO_URL = 'https://i.postimg.cc/Gm3TwhZZ/KPM-SKLB.png';
+export const MAIN_LOGO_URL = 'https://i.postimg.cc/15bq86pj/KPM-SKLB2.png';
+export const KPM_LOGO_URL = 'https://i.postimg.cc/15bq86pj/KPM-SKLB2.png';
 export const SCHOOL_NAME = 'Sekolah Kebangsaan Laksian Banggi';
 
 export const CATEGORIES = ['Pentadbiran', 'Kurikulum', 'Hal Ehwal Murid', 'Kokurikulum', 'Lain-lain'] as const;
