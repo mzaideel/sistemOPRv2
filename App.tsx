@@ -20,7 +20,8 @@ const App: React.FC = () => {
     try {
       const data = await sheetsService.fetchReports();
       if (Array.isArray(data)) {
-        setReports(data);
+        const sorted = [...data].sort((a, b) => b.createdAt - a.createdAt);
+        setReports(sorted);
       }
     } catch (e) {
       console.error("Fetch data error:", e);
@@ -34,7 +35,10 @@ const App: React.FC = () => {
     if (local) {
       try {
         const parsed = JSON.parse(local);
-        if (Array.isArray(parsed)) setReports(parsed);
+        if (Array.isArray(parsed)) {
+          const sorted = [...parsed].sort((a: OPRData, b: OPRData) => b.createdAt - a.createdAt);
+          setReports(sorted);
+        }
       } catch (e) {}
     }
     loadData();
@@ -46,12 +50,14 @@ const App: React.FC = () => {
     if (success) {
       setReports(prev => {
         const idx = prev.findIndex(r => r.id === data.id);
+        let updated;
         if (idx !== -1) {
-          const updated = [...prev];
+          updated = [...prev];
           updated[idx] = data;
-          return updated;
+        } else {
+          updated = [data, ...prev];
         }
-        return [data, ...prev];
+        return updated.sort((a, b) => b.createdAt - a.createdAt);
       });
       setActiveTab('list');
       loadData(false);
@@ -162,10 +168,8 @@ const App: React.FC = () => {
           />
         )}
       </main>
-
-      <footer className="py-10 text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] no-print">
-         UNIT ICT SK LAKSIAN BANGGI © {new Date().getFullYear()}
-      </footer>
+      
+      {/* Footer telah dikeluarkan mengikut permintaan */}
     </div>
   );
 };
